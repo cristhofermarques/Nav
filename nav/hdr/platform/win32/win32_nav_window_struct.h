@@ -8,7 +8,8 @@
 
 struct WindowType
 {
-    HWND hwnd;
+    HWND hWnd;
+    HDC hDc;
 };
 
 

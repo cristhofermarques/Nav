@@ -43,6 +43,7 @@ target("nav")
 target("launcher")
     set_kind("binary")
 
+
     -- Launcher
 
     -- Nav Headers
@@ -51,6 +52,9 @@ target("launcher")
     -- Nav Dependencie
     add_deps("nav")
     
+        add_links("dxgi")
+    add_links("d3d11")
+
     -- Launcher Debug Build Trait
 
     if is_mode("debug") then
