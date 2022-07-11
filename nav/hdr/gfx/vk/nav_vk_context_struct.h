@@ -6,7 +6,7 @@
 
 struct VulkanContextType
 {
-    unsigned int* vkGfxIdx;
+    unsigned int vkGfxIdx;
     VkInstance vkInstance;
     VkSurfaceKHR vkSurfaceKhr;
 };

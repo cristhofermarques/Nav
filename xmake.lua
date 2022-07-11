@@ -1,21 +1,16 @@
 add_rules("mode.debug", "mode.release")
 
 target("nav")
-
     set_kind("shared")
-    set_languages("c11")
 
     -- Vulkan
     add_includedirs("C:/VulkanSDK/1.3.216.0/Include")
     add_linkdirs("C:/VulkanSDK/1.3.216.0/Lib")
     add_links("vulkan-1")
 
-    -- Platform Build Trait
-    if is_plat("mingw") then
-
-        set_suffixname("")
-
-    end
+    -- D3D11
+    add_links("dxgi")
+    add_links("d3d11")
 
     -- Nav
 
@@ -26,17 +21,16 @@ target("nav")
     -- Nav Headers
     add_includedirs("nav/hdr")
 
-
+    
     -- Nav Debug Build Trait
     if is_mode("debug") then
 
         add_cflags("-DDEBUG")
-        --add_defines("DEBUG")
 
     end
 
     -- Nav Vulkan Files
-    add_files("nav/src/gfx/vk/*.c");
+    add_files("nav/src/gfx/vk/*.c")
 
     -- Nav OS Trait
     if is_os("windows") then
@@ -47,10 +41,8 @@ target("nav")
     end
 
 target("launcher")
-
     set_kind("binary")
 
-    set_languages("c11")
 
     -- Launcher
 
@@ -59,6 +51,9 @@ target("launcher")
     
     -- Nav Dependencie
     add_deps("nav")
+    
+        add_links("dxgi")
+    add_links("d3d11")
 
     -- Launcher Debug Build Trait
 
