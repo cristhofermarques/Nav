@@ -14,7 +14,7 @@ char CreateVulkanSurface(VulkanContext* vkCtx, Window* wnd)
     VkWin32SurfaceCreateInfoKHR vkWin32SurfCreateInfoKhr = {0};
     vkWin32SurfCreateInfoKhr.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
     vkWin32SurfCreateInfoKhr.hinstance = GetModuleHandle(0);
-    vkWin32SurfCreateInfoKhr.hwnd = wnd->hwnd;
+    vkWin32SurfCreateInfoKhr.hwnd = wnd->hWnd;
 
     VkResult vkRes = vkCreateWin32SurfaceKHR(vkCtx->vkInstance, &vkWin32SurfCreateInfoKhr, 0, &vkCtx->vkSurfaceKhr);
 
@@ -41,7 +41,7 @@ char CreateVulkanSurface(VulkanContext* vkCtx, Window* wnd)
             {
                 if(queueProps[j].queueFlags & VK_QUEUE_GRAPHICS_BIT)
                 {
-                    vkCtx->vkGfxIdx = j;
+                    *vkCtx->vkGfxIdx = &j;
                     break;
                 }
             }
