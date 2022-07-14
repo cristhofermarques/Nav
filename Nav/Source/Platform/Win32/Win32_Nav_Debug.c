@@ -1,11 +1,12 @@
 #define LEAN_AND_MEAN
 
-#include <nav_debug.h>
+#include <Nav_Debug.h>
 #include <windows.h>
 
-int get_console_color_index(int console_color)
+
+Int32 Nav_Debug_Console_GetColorIndex(Int32 consoleColor)
 {
-    switch(console_color)
+    switch(consoleColor)
     {
         case 0:// Black
             return 0;
@@ -37,10 +38,10 @@ int get_console_color_index(int console_color)
     }
 }
 
-void set_console_print_color(int new_print_color)
+void Nav_Debug_Console_SetPrintColor(Int32 consoleColor)
 {
     HANDLE h_console = GetStdHandle(STD_OUTPUT_HANDLE);
     if(!h_console){return;}
 
-    SetConsoleTextAttribute(h_console, new_print_color);
+    SetConsoleTextAttribute(h_console, consoleColor);
 }

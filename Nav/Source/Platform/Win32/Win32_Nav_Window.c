@@ -1,6 +1,6 @@
-#include <nav_debug.h>
-#include <platform/nav_window.h>
-#include <platform/win32/win32_nav_window_struct.h>
+#include <Nav_Debug.h>
+#include <Platform/Nav_Window.h>
+#include <Platform/Win32/Win32_Nav_Window_Struct.h>
 #include <windows.h>
 
 const char* nav_wnd_class = "nav_wnd_class";
@@ -27,7 +27,7 @@ LRESULT CALLBACK NavWindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 
 }
 
-Window* NavCreateWindow(char* wndTitle, int width, int height) 
+Nav_Window* Nav_Window_Create(char* wndTitle, int width, int height) 
 {
     HINSTANCE hInstance = GetModuleHandle(NULL);
 
@@ -66,7 +66,7 @@ Window* NavCreateWindow(char* wndTitle, int width, int height)
         return NULL;
     }
     
-    Window* wnd = malloc(sizeof(Window));
+    Nav_Window* wnd = malloc(sizeof(Nav_Window));
     wnd->hWnd = hWnd;
 
     if(wnd == NULL)
@@ -78,7 +78,7 @@ Window* NavCreateWindow(char* wndTitle, int width, int height)
     return wnd;
 }
 
-void NavDestroyWindow(Window* wndptr)
+void Nav_Window_Destroy(Nav_Window* wndptr)
 {
     if(wndptr != NULL)
     {
@@ -87,7 +87,7 @@ void NavDestroyWindow(Window* wndptr)
     }
 }
 
-char UpdateWindowEvents(Window* wnd)
+char Nav_Window_UpdateEvents(Nav_Window* wnd)
 {
     MSG msg;
     HWND hWnd = wnd->hWnd;
@@ -104,4 +104,57 @@ char UpdateWindowEvents(Window* wnd)
     }
 
     return 1;
+}
+
+void Nav_Window_SetCanClose(Nav_Window* window, Bool canClose)
+{
+    //TODO : add a check to compare if current state can close is the same as 'canClose' param
+
+    if(canClose)
+    {
+        NAV_BIT_ENABLE(window->state, NAV_WINDOW_STATE_CAN_CLOSE_BIT);
+    }
+    else
+    {
+        NAV_BIT_DISABLE(window->state, NAV_WINDOW_STATE_CAN_CLOSE_BIT);
+    }
+}
+
+IntVector2 Nav_Window_GetClientSize(Nav_Window* window)
+{
+    IntVector2 wndClientSize = (IntVector2){-1, -1};
+
+    if(window == NullPtr){return wndClientSize;}
+
+    RECT wndRect = {0};
+
+    if(GetClientRect(window->hWnd, &wndRect))
+    {
+        wndClientSize.x = wndRect.right - wndRect.left;
+        wndClientSize.y = wndRect.bottom - wndRect.top;
+    }
+
+    return wndClientSize;
+}
+
+void Nav_Window_SetClientSize(Nav_Window* window, IntVector2 newWndSize)
+{
+        
+}
+
+IntVector2 Nav_Window_GetPosition(Nav_Window* window)
+{
+    IntVector2 wndPos = (IntVector2){-1, -1};
+
+    if(window == NullPtr){return wndPos;}
+
+    RECT wndRect = {0};
+
+    if(GetClientRect(window->hWnd, &wndRect))
+    {
+        wndPos.x = wndRect.left;
+        wndPos.y = wndRect.top;
+    }
+
+    return wndPos;
 }

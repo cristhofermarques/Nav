@@ -1,9 +1,9 @@
-#include <nav_debug.h>
-#include <platform/nav_lib.h>
-#include <platform/win32/win32_nav_lib_struct.h>
+#include <Nav_Debug.h>
+#include <Platform/Nav_Library.h>
+#include <Platform/Win32/Win32_Nav_Library_Struct.h>
 #include <windows.h>
 
-Library* NavLoadLibrary(char* libPath)
+Nav_Library* Nav_Library_Load(char* libPath)
 {
     HMODULE hModule = LoadLibrary(libPath);
 
@@ -13,7 +13,7 @@ Library* NavLoadLibrary(char* libPath)
         return NULL;
     };
 
-    Library* lib = malloc(sizeof(Library));
+    Nav_Library* lib = malloc(sizeof(Nav_Library));
 
     if(lib == NULL)
     {
@@ -26,7 +26,7 @@ Library* NavLoadLibrary(char* libPath)
     return lib;
 }
 
-void NavUnloadLibrary(Library* lib)
+void Nav_Library_Unload(Nav_Library* lib)
 {
     if(lib != NULL)
     {
@@ -34,7 +34,7 @@ void NavUnloadLibrary(Library* lib)
     }
 }
 
-void* GetLibraryProcAddress(Library* lib, char* procAddressName)
+void* Nav_Library_GetProcAddress(Nav_Library* lib, char* procAddressName)
 {
     return GetProcAddress(lib->hModule, procAddressName);
 }

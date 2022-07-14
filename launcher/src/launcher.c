@@ -1,20 +1,33 @@
-#include <platform/nav_window.h>
-#include <nav_debug.h>
+#include <Nav_Debug.h>
+#include <Platform/Nav_Window.h>
+#include <Extension/Nav_Library_Extension.h>
+#include <Types/Nav_Function_Pointer.h>
 #include <stdlib.h>
-
 
 int main(int argc, char** argv)
 {
-    Window* wnd = NavCreateWindow("nav", 600, 400);
+    Nav_Window* wnd = Nav_Window_Create("nav", 600, 400);
 
-    DEBUG_LOG(DECIMAL_LOG_FORMAT, WHITE_CONSOLE_COLOR, __STDC_VERSION__)
+    // VulkanContext* vkCtx = CreateVulkanContext();
 
-    while(UpdateWindowEvents(wnd))
+    // if(CreateVulkanSurface(vkCtx, wnd))
+    // {
+    // }
+
+    while(Nav_Window_UpdateEvents(wnd))
     {
-        Sleep(10);
+        IntVector2 wndClientSize = Nav_Window_GetClientSize(wnd);
+        DEBUG_LOG(DECIMAL_LOG_FORMAT DECIMAL_LOG_FORMAT, WHITE_CONSOLE_COLOR, wndClientSize.x, wndClientSize.y);
+
+        IntVector2 wndPos = Nav_Window_GetPosition(wnd);
+        DEBUG_LOG(DECIMAL_LOG_FORMAT DECIMAL_LOG_FORMAT, WHITE_CONSOLE_COLOR, wndPos.x, wndPos.y);
+        
+        Sleep(100);
     }
 
-    NavDestroyWindow(wnd);
+    // DestroyVulkanContext(vkCtx);
+    
+    Nav_Window_Destroy(wnd);
 
     return 0;
 }

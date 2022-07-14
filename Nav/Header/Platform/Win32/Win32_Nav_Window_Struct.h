@@ -4,10 +4,14 @@
 #define LEAN_AND_MEAN
 
 #include <platform/nav_window.h>
-#include <Windows.h>
+#include <windows.h>
 
-struct WindowType
+#define NAV_WINDOW_STATE_CAN_CLOSE_BIT 0
+
+struct Nav_WindowType
 {
+    Bit8 state;
+
     HWND hWnd;
     HDC hDc;
 };

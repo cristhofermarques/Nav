@@ -1,6 +1,6 @@
-#include <nav_debug.h>
-#include <gfx/vk/nav_vk.h>
-#include <gfx/vk/nav_vk_context_struct.h>
+#include <Nav_Debug.h>
+#include <Graphics/Vulkan/Nav_Vulkan.h>
+#include <Graphics/Vulkan/Nav_Vulkan_Context_Struct.h>
 #include <vulkan/vulkan.h>
 #include <stdlib.h>
 
@@ -53,4 +53,11 @@ char DestroyVulkanContext(VulkanContext* vkCtx)
     }
 
     return 0;
+}
+
+unsigned int GetGraphicsIndexOfVulkanContext(VulkanContext* vkCtx)
+{
+    if(vkCtx == NULL){return UINT32_MAX;}
+
+    return vkCtx->vkGfxIdx;
 }
