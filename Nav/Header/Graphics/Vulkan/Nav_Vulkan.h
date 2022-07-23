@@ -29,4 +29,6 @@ NAV_API char CreateVulkanSurface(VulkanContext* vkCtx, Nav_Window* wnd);
 
 NAV_API unsigned int GetGraphicsIndexOfVulkanContext(VulkanContext* vkCtx);
 
+NAV_API Bool Nav_Graphics_Vulkan_Render(VulkanContext* vkCtx);
+
 #endif

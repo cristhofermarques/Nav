@@ -1,31 +1,31 @@
 #include <Nav_Debug.h>
 #include <Platform/Nav_Window.h>
-#include <Extension/Nav_Library_Extension.h>
-#include <Types/Nav_Function_Pointer.h>
+#include <Graphics/Vulkan/Nav_Vulkan.h>
 #include <stdlib.h>
 
 int main(int argc, char** argv)
 {
     Nav_Window* wnd = Nav_Window_Create("nav", 600, 400);
 
-    // VulkanContext* vkCtx = CreateVulkanContext();
+    VulkanContext* vkCtx = NullPtr;
 
-    // if(CreateVulkanSurface(vkCtx, wnd))
-    // {
-    // }
-
-    while(Nav_Window_UpdateEvents(wnd))
+    if((vkCtx = CreateVulkanContext()) == NullPtr)
     {
-        IntVector2 wndClientSize = Nav_Window_GetClientSize(wnd);
-        DEBUG_LOG(DECIMAL_LOG_FORMAT DECIMAL_LOG_FORMAT, WHITE_CONSOLE_COLOR, wndClientSize.x, wndClientSize.y);
-
-        IntVector2 wndPos = Nav_Window_GetPosition(wnd);
-        DEBUG_LOG(DECIMAL_LOG_FORMAT DECIMAL_LOG_FORMAT, WHITE_CONSOLE_COLOR, wndPos.x, wndPos.y);
-        
-        Sleep(100);
+        DEBUG_ERROR("ctx");
     }
 
-    // DestroyVulkanContext(vkCtx);
+    if(CreateVulkanSurface(vkCtx, wnd))
+    {
+        DEBUG_INFO("surf");
+    }
+
+    while(Nav_Window_UpdateEvents(wnd))
+    {   
+        Nav_Graphics_Vulkan_Render(vkCtx);
+        //Sleep(10);
+    }
+
+    DestroyVulkanContext(vkCtx);
     
     Nav_Window_Destroy(wnd);
 

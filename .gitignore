@@ -2,10 +2,9 @@
 .xmake/
 build/
 
-# VSCode Folder
+# Text Editors
 .vscode
+.lite_project.lua
 
 # MacOS Cache
 .DS_Store
-
-
