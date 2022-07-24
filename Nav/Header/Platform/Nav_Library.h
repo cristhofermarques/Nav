@@ -1,14 +1,14 @@
-#ifndef NAV_LIB_H
-#define NAV_LIB_H
+#ifndef NAV_LIBRARY_H
+#define NAV_LIBRARY_H
 
-#include <nav_api.h>
+#include <Nav_Api.h>
 
-struct Nav_LibraryType;
-typedef struct Nav_LibraryType Nav_Library;
+struct NavLibraryType;
+typedef struct NavLibraryType NavLibrary;
 
-NAV_API Nav_Library* Nav_Library_Load(char* libPath);
-NAV_API void Nav_Library_Unload(Nav_Library* lib);
+NAV_API NavLibrary* Nav_Library_Load(char* libPath);
+NAV_API void Nav_Library_Unload(NavLibrary* lib);
 
-NAV_API void* Nav_Library_GetProcAddress(Nav_Library* lib, char* procAddressName);
+NAV_API void* Nav_Library_GetProcAddress(NavLibrary* lib, char* procAddressName);
 
 #endif

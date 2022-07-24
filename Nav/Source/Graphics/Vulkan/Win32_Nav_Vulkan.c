@@ -14,7 +14,7 @@
 #define False 0x00
 #define True 0xff
 
-Bool Nav_Graphics_Vulkan_CreateSurface(VulkanContext* vkCtx, Nav_Window* wnd)
+Bool Nav_Graphics_Vulkan_CreateSurface(VulkanContext* vkCtx, NavWindow* wnd)
 {
     if(vkCtx == NullPtr){return False;}
 
@@ -123,7 +123,7 @@ Bool Nav_Graphics_Vulkan_CreateDevice(VulkanContext* vkCtx, float queuePriority)
     return True;
 }
 
-char CreateVulkanSurface(VulkanContext* vkCtx, Nav_Window* wnd)
+char CreateVulkanSurface(VulkanContext* vkCtx, NavWindow* wnd)
 {
     if(&vkCtx->vkInstance == 0){return 0;}
     
@@ -174,24 +174,25 @@ char CreateVulkanSurface(VulkanContext* vkCtx, Nav_Window* wnd)
             VkPresentModeKHR modes[16];
 
             VkSwapchainCreateInfoKHR vkSwapchainCreateInfoKhr = NullStruct;
-            vkSwapchainCreateInfoKhr.presentMode = VK_PRESENT_MODE_FIFO_KHR;
 
             if(vkGetPhysicalDeviceSurfacePresentModesKHR(vkCtx->vkPhysicalDev, vkCtx->vkSurfaceKhr, &presentModeCount, NullPtr) == VK_SUCCESS &&
             vkGetPhysicalDeviceSurfacePresentModesKHR(vkCtx->vkPhysicalDev, vkCtx->vkSurfaceKhr, &presentModeCount, modes) == VK_SUCCESS)
             {
                 for(UInt32 i = 0; i < presentModeCount; i++)
                 {
-                    if(modes[i] == VK_PRESENT_MODE_MAILBOX_KHR)
-                    {
-                        vkSwapchainCreateInfoKhr.presentMode = VK_PRESENT_MODE_MAILBOX_KHR;
-                    }
+                    // if(modes[i] == VK_PRESENT_MODE_MAILBOX_KHR)
+                    // {
+                    //     vkSwapchainCreateInfoKhr.presentMode = VK_PRESENT_MODE_MAILBOX_KHR;
+                    // }
 
                     DEBUG_LOG(DECIMAL_LOG_FORMAT, GREEN_CONSOLE_COLOR, modes[i]);
                 }
             }
 
+            vkSwapchainCreateInfoKhr.presentMode = VK_PRESENT_MODE_FIFO_KHR;
             vkSwapchainCreateInfoKhr.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-            vkSwapchainCreateInfoKhr.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+            vkSwapchainCreateInfoKhr.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+            vkSwapchainCreateInfoKhr.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
             vkSwapchainCreateInfoKhr.surface = vkCtx->vkSurfaceKhr;
             vkSwapchainCreateInfoKhr.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
             vkSwapchainCreateInfoKhr.imageArrayLayers = 1;
@@ -224,8 +225,12 @@ char CreateVulkanSurface(VulkanContext* vkCtx, Nav_Window* wnd)
             {
                 return 0;
             }
+            else
+            {
+                DEBUG_LOG(DECIMAL_LOG_FORMAT, GREEN_CONSOLE_COLOR, vkCtx->vkSwapchainImgCount);
+            }
 
-            for(int i = 0; i < 2; i++)
+            for(int i = 0; i < vkCtx->vkSwapchainImgCount; i++)
             {
                 VkImageViewCreateInfo imgViewCreateInfo = NullStruct;
                 imgViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -246,21 +251,107 @@ char CreateVulkanSurface(VulkanContext* vkCtx, Nav_Window* wnd)
 
                 if(vkCreateImageView(vkCtx->vkDev, &imgViewCreateInfo, NullPtr, &vkCtx->vkImgViews[i]) != VK_SUCCESS)
                 {
-                    DEBUG_ERROR("failed to create img view");
+                    DEBUG_ERROR("Failed Create Image View");
                 }
             }
 
         }
 
-        VkCommandPoolCreateInfo cmdPoolCreateInfo = {0};
-        cmdPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-        cmdPoolCreateInfo.queueFamilyIndex = vkCtx->vkGfxIdx;
-
-        if(vkCreateCommandPool(vkCtx->vkDev, &cmdPoolCreateInfo, NullPtr, &vkCtx->vkCmdPool) != VK_SUCCESS)
+        // Render pass
         {
-            return 0;
+            VkAttachmentDescription attachDesc = NullStruct;
+            attachDesc.format = vkCtx->vkSurfFormat.format;
+            attachDesc.samples = VK_SAMPLE_COUNT_1_BIT;
+            attachDesc.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+            attachDesc.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+            attachDesc.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+            attachDesc.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+            attachDesc.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+            attachDesc.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+            VkAttachmentReference attachRef = NullStruct;
+            attachRef.attachment = 0;
+            attachRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+            VkSubpassDescription subPassDesc = NullStruct;
+            subPassDesc.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+            subPassDesc.pColorAttachments = &attachRef;
+            subPassDesc.colorAttachmentCount = 1;
+
+            VkRenderPassCreateInfo renderPassCreateInfo = NullStruct;
+            renderPassCreateInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+            renderPassCreateInfo.pAttachments = &attachDesc;
+            renderPassCreateInfo.attachmentCount = 1;
+            renderPassCreateInfo.pSubpasses = &subPassDesc;
+            renderPassCreateInfo.subpassCount = 1;
+
+            if(vkCreateRenderPass(vkCtx->vkDev, &renderPassCreateInfo, NullPtr, &vkCtx->vkRenderPass) == VK_SUCCESS)
+            {
+                DEBUG_INFO("Success Create Render Pass");
+            }
+            else
+            {
+                DEBUG_ERROR("Failed Create Render Pass");
+            }
         }
 
+        // Framebuffers
+
+        {
+            IntVector2 wndSize = Nav_Window_GetClientSize(wnd);
+
+            VkFramebufferCreateInfo framebufferCreateInfo = NullStruct;
+            framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+            framebufferCreateInfo.width = wndSize.x;
+            framebufferCreateInfo.height = wndSize.y;
+            framebufferCreateInfo.renderPass = vkCtx->vkRenderPass;
+            framebufferCreateInfo.layers = 1;
+            framebufferCreateInfo.attachmentCount = 1;
+
+            for(int i = 0; i < vkCtx->vkSwapchainImgCount; i++)
+            {
+                framebufferCreateInfo.pAttachments = &vkCtx->vkImgViews[i];
+
+                if(vkCreateFramebuffer(vkCtx->vkDev, &framebufferCreateInfo, NullPtr, &(vkCtx->vkFramebuffers[i])) == VK_SUCCESS)
+                {
+                    DEBUG_INFO("Success Create Framebuffer");
+                }
+                else
+                {
+                    DEBUG_ERROR("Failed Create Framebuffer");
+                }
+            }
+        }
+
+        // Command Pool
+        {
+            VkCommandPoolCreateInfo cmdPoolCreateInfo = NullStruct;
+            cmdPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+            cmdPoolCreateInfo.queueFamilyIndex = vkCtx->vkGfxIdx;
+
+            if(vkCreateCommandPool(vkCtx->vkDev, &cmdPoolCreateInfo, NullPtr, &vkCtx->vkCmdPool) != VK_SUCCESS)
+            {
+                DEBUG_ERROR("Failed create command pool");
+                return 0;
+            }
+        }
+
+        // Fence
+        {
+            VkFenceCreateInfo fenceCreateInfo = NullStruct;
+            fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+
+                if(vkCreateFence(vkCtx->vkDev, &fenceCreateInfo, NullPtr, &vkCtx->vkFence) == VK_SUCCESS)
+                {
+                    DEBUG_INFO("Success Create Fence");
+                }
+                else
+                {
+                    DEBUG_ERROR("Failed Create Fence");
+                }
+        }
+
+        // Semaphores
         {
             VkSemaphoreCreateInfo semaphoreCreateInfo = NullStruct;
             semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -268,82 +359,149 @@ char CreateVulkanSurface(VulkanContext* vkCtx, Nav_Window* wnd)
             vkCreateSemaphore(vkCtx->vkDev, &semaphoreCreateInfo, NullPtr, &vkCtx->vkSubmitSemaphore);
             vkCreateSemaphore(vkCtx->vkDev, &semaphoreCreateInfo, NullPtr, &vkCtx->vkAcquireSemaphore);
         }
+
     }
 
     DEBUG_INFO("EVERYTHING IS OK");
     return 1;
 }
 
-Bool Nav_Graphics_Vulkan_Render(VulkanContext* vkCtx)
+Bool Nav_Graphics_Vulkan_Render(VulkanContext* vkCtx, IntVector2 size)
 {
-    UInt32 imgIdx = 0;
+    if(vkWaitForFences(vkCtx->vkDev, 1, &vkCtx->vkFence, VK_TRUE, 1000000000) == VK_SUCCESS)
+    {
+        DEBUG_INFO("Wait Fence");
+    }
 
-    if(vkAcquireNextImageKHR(vkCtx->vkDev, vkCtx->vkSwapchainKhr, 0, vkCtx->vkAcquireSemaphore, 0, &imgIdx) == VK_SUCCESS){}
+    if(vkResetFences(vkCtx->vkDev, 1, &vkCtx->vkFence) == VK_SUCCESS)
+    {
+        DEBUG_INFO("Resent Fence");
+    }
+
+    static UInt32 imgIdx = 0;
+
+    if(vkAcquireNextImageKHR(vkCtx->vkDev, vkCtx->vkSwapchainKhr, 1000000000, vkCtx->vkAcquireSemaphore, NullPtr, &imgIdx) == VK_SUCCESS)
+    {
+        DEBUG_INFO("Sucess Acquire Next Image");
+    }
     else
-    {return 0;}
+    {
+        DEBUG_ERROR("Failed Acquire Next Image");
+        return False;
+    }
 
-    VkCommandBufferAllocateInfo cmdBuffAllocInfo = {0};
+    VkCommandBufferAllocateInfo cmdBuffAllocInfo = NullStruct;
     cmdBuffAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    cmdBuffAllocInfo.pNext = NullPtr;
     cmdBuffAllocInfo.commandBufferCount = 1;
     cmdBuffAllocInfo.commandPool = vkCtx->vkCmdPool;
+    cmdBuffAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 
-    VkCommandBuffer cmd;
-    if(vkAllocateCommandBuffers(vkCtx->vkDev, &cmdBuffAllocInfo, &cmd) != VK_SUCCESS){return 0;}
+    VkCommandBuffer cmd = NullPtr;
+    if(vkAllocateCommandBuffers(vkCtx->vkDev, &cmdBuffAllocInfo, &cmd) != VK_SUCCESS)
+    {
+        DEBUG_ERROR("Failed Allocate Command Buffer");
+        return False;
+    }
 
     VkCommandBufferBeginInfo cmdBuffBeginInfo = NullStruct;
     cmdBuffBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     cmdBuffBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
 
-    if(vkBeginCommandBuffer(cmd, &cmdBuffBeginInfo) != VK_SUCCESS){return 0;}
-    DEBUG_INFO("render");
-
-    // Render Scope
+    if(vkBeginCommandBuffer(cmd, &cmdBuffBeginInfo) != VK_SUCCESS)
     {
-
-        VkClearColorValue color = {1, 0, 0, 1};
-
-        VkImageSubresourceRange range = NullStruct;
-        range.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        range.layerCount = 1;
-        range.levelCount = 1;
-
-        VkImageLayout imgLayout = NullStruct;
-        imgLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
-        vkCmdClearColorImage(cmd, vkCtx->vkImgs[imgIdx], VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, &color, 1, &range);
+        DEBUG_ERROR("Failed Begin Command Buffer");
+        return False;
     }
 
-    if(vkEndCommandBuffer(cmd) != VK_SUCCESS){return 0;}
+    VkClearColorValue color = {1, 0, 0, 1};
+
+    VkRenderPassBeginInfo renderPasBeginInfo = NullStruct;
+    renderPasBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    renderPasBeginInfo.renderPass = vkCtx->vkRenderPass;
+    renderPasBeginInfo.renderArea.extent.width = size.x;
+    renderPasBeginInfo.renderArea.extent.height = size.y;
+    renderPasBeginInfo.framebuffer = vkCtx->vkFramebuffers[imgIdx];
+    renderPasBeginInfo.pClearValues = &color;
+    renderPasBeginInfo.clearValueCount = 1;
+
+    vkCmdBeginRenderPass(cmd, &renderPasBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+    vkCmdEndRenderPass(cmd);
+
+    // // Render Scope
+    // {
+
+
+    //     VkImageSubresourceRange range = NullStruct;
+    //     range.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    //     range.layerCount = 1;
+    //     range.levelCount = 1;
+    //     range.baseMipLevel = 0;
+    //     range.baseArrayLayer = 0;
+
+    //     VkImageLayout imgLayout = NullStruct;
+    //     imgLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+    //     vkCmdClearColorImage(cmd, vkCtx->vkImgs[imgIdx], VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, &color, 1, &range);
+    // }
+
+    if(vkEndCommandBuffer(cmd) != VK_SUCCESS)
+    {
+        DEBUG_ERROR("Failed End Command Buffer");
+        return False;
+    }
 
     VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 
-    VkSubmitInfo submitInfo = {0};
+    VkSubmitInfo submitInfo = NullStruct;
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    submitInfo.pCommandBuffers = &cmd;
-    submitInfo.commandBufferCount = 1;
-    submitInfo.pWaitSemaphores = &vkCtx->vkAcquireSemaphore;
-    submitInfo.waitSemaphoreCount = 1;
-    submitInfo.pSignalSemaphores = &vkCtx->vkSubmitSemaphore;
-    submitInfo.signalSemaphoreCount = 1;
 
     submitInfo.pWaitDstStageMask = &waitStage;
 
-    if(vkQueueSubmit(vkCtx->vkQueue, 1, &submitInfo, 0) != VK_SUCCESS){return 0;}
+    submitInfo.pWaitSemaphores = &vkCtx->vkAcquireSemaphore;
+    submitInfo.waitSemaphoreCount = 1;
+
+    submitInfo.pSignalSemaphores = &vkCtx->vkSubmitSemaphore;
+    submitInfo.signalSemaphoreCount = 1;
+
+    submitInfo.pCommandBuffers = &cmd;
+    submitInfo.commandBufferCount = 1;
+
+    if(vkQueueSubmit(vkCtx->vkQueue, 1, &submitInfo, vkCtx->vkFence) == VK_SUCCESS)
+    {
+        DEBUG_INFO("Success Submit");
+    }
+    else
+    {
+        DEBUG_ERROR("Failed Submit");
+    }
 
 
-    VkPresentInfoKHR presentInfo;
+    VkPresentInfoKHR presentInfo = NullStruct;
     presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
     presentInfo.pNext = NullPtr;
+
     presentInfo.pSwapchains = &vkCtx->vkSwapchainKhr;
     presentInfo.swapchainCount = 1;
-    presentInfo.pImageIndices = &imgIdx;
+
     presentInfo.pWaitSemaphores = &vkCtx->vkSubmitSemaphore;
     presentInfo.waitSemaphoreCount = 1;
 
-    if(vkQueuePresentKHR(vkCtx->vkQueue, &presentInfo) != VK_SUCCESS){return 0;}
+    presentInfo.pImageIndices = &imgIdx;
 
-    if(vkDeviceWaitIdle(vkCtx->vkDev) != VK_SUCCESS){return 0;}
+    if(vkQueuePresentKHR(vkCtx->vkQueue, &presentInfo) != VK_SUCCESS)
+    {
+        DEBUG_ERROR("Failed Present Image");
+    }
+    
+    if(vkDeviceWaitIdle(vkCtx->vkDev) != VK_SUCCESS)
+    {
+ 
+    }
 
     vkFreeCommandBuffers(vkCtx->vkDev, vkCtx->vkCmdPool, 1, &cmd);
+
+    return True;
 }

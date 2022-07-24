@@ -2,7 +2,7 @@
 #define NAV_DEBUG_H
 
 #include <Nav_Api.h>
-#include <Math/Nav_Value_Type.h>
+#include <Types/Nav_Value_Type.h>
 
 #define BLACK_CONSOLE_COLOR 0
 #define GRAY_CONSOLE_COLOR 1
@@ -20,7 +20,7 @@
 NAV_API Int32 Nav_Debug_Console_GetColorIndex(Int32 consoleColor);
 NAV_API void Nav_Debug_Console_SetPrintColor(Int32 consoleColor);
 
-#ifdef DEBUG
+#ifdef NAV_BUILD_MODE_DEBUG
 
 #include<stdio.h>
 #include <stdlib.h>
@@ -40,7 +40,7 @@ NAV_API void Nav_Debug_Console_SetPrintColor(Int32 consoleColor);
     printf("LOG %s %s() %d : " log_format "\n", __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__); \
     Nav_Debug_Console_SetPrintColor(Nav_Debug_Console_GetColorIndex(WHITE_CONSOLE_COLOR));
 
-#else // RELEASE
+#else // NAV_BUILD_RELEASE
 
 #define DEBUG_INFO(info_msg)
 #define DEBUG_ERROR(error_msg)
@@ -49,6 +49,6 @@ NAV_API void Nav_Debug_Console_SetPrintColor(Int32 consoleColor);
 #define INIT_DEBUG_HISTORY_SAVE(character_capacity)
 #define END_DEBUG_HISTORY_SAVE()
 
-#endif
+#endif // NAV_BUILD_DEBUG
 
 #endif // NAV_DEBUG_H

@@ -1,14 +1,12 @@
 #include <Extension/Nav_Library_Extension.h>
-#include <Math/Nav_Value_Type.h>
-#include <Types/Nav_Function_Pointer.h>
 #include <Memory/Nav_Allocation.h>
 #include <Nav_Debug.h>
 
-Nav_Library_Extension Nav_Library_Extension_Load(char* libExtPath)
+NavLibraryExtension Nav_Library_Extension_Load(char* libExtPath)
 {
-    Nav_Library_Extension libExt = NullStruct;
+    NavLibraryExtension libExt = NullStruct;
 
-    Nav_Library* lib = Nav_Library_Load(libExtPath);
+    NavLibrary* lib = Nav_Library_Load(libExtPath);
 
     if(lib == NullPtr)
     {
@@ -58,7 +56,7 @@ Nav_Library_Extension Nav_Library_Extension_Load(char* libExtPath)
     return libExt;
 }
 
-void Nav_Library_Extension_Unload(Nav_Library_Extension libExt)
+void Nav_Library_Extension_Unload(NavLibraryExtension libExt)
 {
     if(!Nav_Library_Extension_IsValid(libExt)){return;}
 
@@ -67,7 +65,7 @@ void Nav_Library_Extension_Unload(Nav_Library_Extension libExt)
     Nav_Library_Unload(libExt.library);
 }
 
-Bool Nav_Library_Extension_IsValid(Nav_Library_Extension libExt)
+Bool Nav_Library_Extension_IsValid(NavLibraryExtension libExt)
 {
     return libExt.library != NullPtr && libExt.OnLoad != NullPtr && libExt.OnUnload != NullPtr && libExt.GetFuncPtrsStructSize != NullPtr && libExt.funcPtrsStructSize != 0 && libExt.funcPtrsStruct != NullPtr;
 }

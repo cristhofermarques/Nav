@@ -5,7 +5,7 @@
 
 int main(int argc, char** argv)
 {
-    Nav_Window* wnd = Nav_Window_Create("nav", 600, 400);
+    NavWindow* wnd = Nav_Window_Create("nav", 600, 400);
 
     VulkanContext* vkCtx = NullPtr;
 
@@ -21,7 +21,7 @@ int main(int argc, char** argv)
 
     while(Nav_Window_UpdateEvents(wnd))
     {   
-        Nav_Graphics_Vulkan_Render(vkCtx);
+        Nav_Graphics_Vulkan_Render(vkCtx, Nav_Window_GetClientSize(wnd));
         //Sleep(10);
     }
 

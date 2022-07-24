@@ -16,6 +16,10 @@ target("nav")
     add_links("vulkan-1")
 
 
+    -- Vulkan
+    --add_links("opengl");
+
+
     -- Platform Build Trait
     if is_plat("mingw") then
 
@@ -35,14 +39,13 @@ target("nav")
     -- Nav Debug Build Trait
     if is_mode("debug") then
 
-        add_cflags("-DDEBUG")
+        add_cflags("-DNAV_BUILD_MODE_DEBUG")
 
     end
 
 
-    -- Nav No Platform Depedent Source Files
+    -- Nav Platform Indepedent Source Files
     add_files("Nav/Source/Extension/*.c");
-
 
     -- Nav Vulkan Source Files
     add_files("Nav/Source/Graphics/Vulkan/*.c");
@@ -51,7 +54,11 @@ target("nav")
     -- Nav OS Source Files Trait
     if is_os("windows") then
 
+        add_cflags("-DNAV_BUILD_PLATFORM_WINDOWS")
+
         add_files("Nav/Source/Platform/Win32/*.c")
+        add_files("Nav/Source/Graphics/OpenGL/Win32/*.c")
+
         add_links("user32")
 
     end
@@ -63,12 +70,6 @@ target("launcher")
     set_kind("binary")
 
     set_languages("c11")
-
-    -- Vulkan
-    add_includedirs("C:/VulkanSDK/1.3.216.0/Include")
-    add_linkdirs("C:/VulkanSDK/1.3.216.0/Lib")
-    add_links("vulkan-1")
-
 
     -- Launcher
 

@@ -6,7 +6,7 @@
 const char* nav_wnd_class = "nav_wnd_class";
 const UINT NAV_WND_CLOSE = WM_USER + 1;
 
-LRESULT CALLBACK NavWindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK Nav_Window_Procedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     switch(msg)
     {
@@ -27,14 +27,14 @@ LRESULT CALLBACK NavWindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam
 
 }
 
-Nav_Window* Nav_Window_Create(char* wndTitle, int width, int height) 
+NavWindow* Nav_Window_Create(char* wndTitle, int width, int height) 
 {
     HINSTANCE hInstance = GetModuleHandle(NULL);
 
     WNDCLASSEX wndClassExA = {0};
     wndClassExA.cbSize = sizeof(WNDCLASSEX);
     wndClassExA.style = CS_OWNDC;
-    wndClassExA.lpfnWndProc = NavWindowProc;
+    wndClassExA.lpfnWndProc = Nav_Window_Procedure;
     wndClassExA.cbClsExtra = 0;
     wndClassExA.cbWndExtra = 0;
     wndClassExA.hInstance = hInstance;
@@ -66,28 +66,31 @@ Nav_Window* Nav_Window_Create(char* wndTitle, int width, int height)
         return NULL;
     }
     
-    Nav_Window* wnd = malloc(sizeof(Nav_Window));
-    wnd->hWnd = hWnd;
+    NavWindow* wnd = malloc(sizeof(NavWindow));
 
     if(wnd == NULL)
     {
         DEBUG_ERROR("falied allocate window memory");
         return NULL;
     }
+    HDC hDc = GetWindowDC(hWnd);
+    
+    wnd->hWnd = hWnd;
+    wnd->hDc = hDc;
 
     return wnd;
 }
 
-void Nav_Window_Destroy(Nav_Window* wndptr)
+void Nav_Window_Destroy(NavWindow* wnd)
 {
-    if(wndptr != NULL)
+    if(wnd != NULL)
     {
-        DestroyWindow(wndptr->hWnd);
-        free(wndptr);
+        DestroyWindow(wnd->hWnd);
+        free(wnd);
     }
 }
 
-char Nav_Window_UpdateEvents(Nav_Window* wnd)
+Bool Nav_Window_UpdateEvents(NavWindow* wnd)
 {
     MSG msg;
     HWND hWnd = wnd->hWnd;
@@ -106,29 +109,29 @@ char Nav_Window_UpdateEvents(Nav_Window* wnd)
     return 1;
 }
 
-void Nav_Window_SetCanClose(Nav_Window* window, Bool canClose)
+void Nav_Window_SetCanClose(NavWindow* wnd, Bool canClose)
 {
     //TODO : add a check to compare if current state can close is the same as 'canClose' param
 
     if(canClose)
     {
-        NAV_BIT_ENABLE(window->state, NAV_WINDOW_STATE_CAN_CLOSE_BIT);
+        NAV_BIT_ENABLE(wnd->state, NAV_WINDOW_STATE_CAN_CLOSE_BIT);
     }
     else
     {
-        NAV_BIT_DISABLE(window->state, NAV_WINDOW_STATE_CAN_CLOSE_BIT);
+        NAV_BIT_DISABLE(wnd->state, NAV_WINDOW_STATE_CAN_CLOSE_BIT);
     }
 }
 
-IntVector2 Nav_Window_GetClientSize(Nav_Window* window)
+IntVector2 Nav_Window_GetClientSize(NavWindow* wnd)
 {
     IntVector2 wndClientSize = (IntVector2){-1, -1};
 
-    if(window == NullPtr){return wndClientSize;}
+    if(wnd == NullPtr){return wndClientSize;}
 
     RECT wndRect = {0};
 
-    if(GetClientRect(window->hWnd, &wndRect))
+    if(GetClientRect(wnd->hWnd, &wndRect))
     {
         wndClientSize.x = wndRect.right - wndRect.left;
         wndClientSize.y = wndRect.bottom - wndRect.top;
@@ -137,20 +140,20 @@ IntVector2 Nav_Window_GetClientSize(Nav_Window* window)
     return wndClientSize;
 }
 
-void Nav_Window_SetClientSize(Nav_Window* window, IntVector2 newWndSize)
+void Nav_Window_SetClientSize(NavWindow* wnd, IntVector2 newWndSize)
 {
         
 }
 
-IntVector2 Nav_Window_GetPosition(Nav_Window* window)
+IntVector2 Nav_Window_GetPosition(NavWindow* wnd)
 {
     IntVector2 wndPos = (IntVector2){-1, -1};
 
-    if(window == NullPtr){return wndPos;}
+    if(wnd == NullPtr){return wndPos;}
 
     RECT wndRect = {0};
 
-    if(GetClientRect(window->hWnd, &wndRect))
+    if(GetClientRect(wnd->hWnd, &wndRect))
     {
         wndPos.x = wndRect.left;
         wndPos.y = wndRect.top;

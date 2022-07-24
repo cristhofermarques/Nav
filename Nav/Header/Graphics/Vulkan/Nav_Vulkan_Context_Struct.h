@@ -6,10 +6,11 @@
 
 struct VulkanContextType
 {
+    VkInstance vkInstance;
+
     UInt32 vkGfxIdx;
     UInt32 vkSwapchainImgCount;
-    VkImage vkImgs[3];
-    VkInstance vkInstance;
+    VkImage vkImgs[16];
     VkSurfaceKHR vkSurfaceKhr;
     VkPhysicalDevice vkPhysicalDev;
     VkDevice vkDev;
@@ -21,7 +22,12 @@ struct VulkanContextType
     VkSemaphore vkSubmitSemaphore;
     VkSemaphore vkAcquireSemaphore;
 
-    VkImageView vkImgViews[3];
+    VkImageView vkImgViews[16];
+
+    VkRenderPass vkRenderPass;
+    VkFramebuffer vkFramebuffers[16];
+
+    VkFence vkFence;
 };
 
 #endif // NAV_VULKAN_CONTEXT_STRUCT_H

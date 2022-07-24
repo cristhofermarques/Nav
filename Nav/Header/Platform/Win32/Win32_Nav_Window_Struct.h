@@ -8,7 +8,7 @@
 
 #define NAV_WINDOW_STATE_CAN_CLOSE_BIT 0
 
-struct Nav_WindowType
+struct NavWindowType
 {
     Bit8 state;
 

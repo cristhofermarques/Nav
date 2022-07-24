@@ -1,7 +1,7 @@
 #ifndef NAV_BIT_H
 #define NAV_BIT_H
 
-#include <math/nav_value_type.h>
+#include <Types/Nav_Value_Type.h>
 
 #define NAV_BIT8_CREATE_MASK(bitRow) ((((Bit8)1) << bitRow))
 #define NAV_BIT16_CREATE_MASK(bitRow) ((((Bit16)1) << bitRow))

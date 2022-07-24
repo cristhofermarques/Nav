@@ -6,7 +6,7 @@
 #define CLEAN_AND_MEAN
 #include <windows.h>
 
-struct Nav_LibraryType
+struct NavLibraryType
 {
     HMODULE hModule;
 };

@@ -106,17 +106,19 @@ char DestroyVulkanContext(VulkanContext* vkCtx)
 {
     if(vkCtx != NULL)
     {
-        for(int i = 0; i < 2; i++)
-        {
-            vkDestroyImageView(vkCtx->vkDev, vkCtx->vkImgViews[i], NullPtr);
-        }
 
         if(&vkCtx->vkSwapchainKhr != NullPtr)
         {
             vkDestroySwapchainKHR(vkCtx->vkDev, vkCtx->vkSwapchainKhr, NullPtr);
         }
 
+        vkDestroyRenderPass(vkCtx->vkDev, vkCtx->vkRenderPass, NullPtr);
 
+        for(int i = 0; i < vkCtx->vkSwapchainImgCount; i++)
+        {
+            vkDestroyFramebuffer(vkCtx->vkDev, vkCtx->vkFramebuffers[i], NullPtr);
+            vkDestroyImageView(vkCtx->vkDev, vkCtx->vkImgViews[i], NullPtr);
+        }
         vkDestroySurfaceKHR(vkCtx->vkInstance, vkCtx->vkSurfaceKhr, NullPtr);
 
         PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessengerEXT = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(vkCtx->vkInstance, "vkCreateDebugUtilsMessengerEXT");
