@@ -7,6 +7,9 @@
 
 typedef unsigned char Bool;
 
+#define False 0x00
+#define True 0xff
+
 typedef signed char Int8;
 typedef signed short Int16;
 typedef signed int Int32;

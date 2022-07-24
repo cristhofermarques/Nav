@@ -27,9 +27,9 @@ LRESULT CALLBACK Nav_Window_Procedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 
 }
 
-NavWindow* Nav_Window_Create(char* wndTitle, int width, int height) 
+NavWindow* Nav_Window_Create(char* wndTitle, int width, int height, NavWindowStyle style) 
 {
-    HINSTANCE hInstance = GetModuleHandle(NULL);
+    HINSTANCE hInstance = GetModuleHandleA(NULL);
 
     WNDCLASSEX wndClassExA = {0};
     wndClassExA.cbSize = sizeof(WNDCLASSEX);
@@ -58,7 +58,27 @@ NavWindow* Nav_Window_Create(char* wndTitle, int width, int height)
         DEBUG_LOG(STRING_LOG_FORMAT, WHITE_CONSOLE_COLOR, "nav window class registered");
     }
 
-    HWND hWnd = CreateWindowEx(0, nav_wnd_class, wndTitle, WS_OVERLAPPEDWINDOW | WS_VISIBLE, 0, 0, width, height, NULL, NULL, hInstance, NULL);
+    DWORD wndStyle = WS_OVERLAPPEDWINDOW;
+
+    switch(style)
+    {
+        case NAV_WINDOW_STYLE_BORDER_COMPLETE :
+            wndStyle = WS_OVERLAPPEDWINDOW;
+        break;
+
+        case NAV_WINDOW_STYLE_BORDER_CLEAN :
+            wndStyle = WS_SYSMENU;
+        break;
+
+        case NAV_WINDOW_STYLE_BORDERLESS :
+            wndStyle = WS_POPUP;
+        break;
+
+        default :
+            wndStyle = WS_OVERLAPPEDWINDOW;
+    }
+
+    HWND hWnd = CreateWindowEx(0, nav_wnd_class, wndTitle, wndStyle | WS_VISIBLE, 0, 0, width, height, NULL, NULL, hInstance, NULL);
 
     if(!hWnd)
     {
@@ -73,6 +93,7 @@ NavWindow* Nav_Window_Create(char* wndTitle, int width, int height)
         DEBUG_ERROR("falied allocate window memory");
         return NULL;
     }
+
     HDC hDc = GetWindowDC(hWnd);
     
     wnd->hWnd = hWnd;

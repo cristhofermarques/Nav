@@ -6,10 +6,19 @@
 #include <Types/Nav_Value_Type.h>
 #include <Types/Nav_Vector.h>
 
+enum NavWindowStyleEnum
+{
+    NAV_WINDOW_STYLE_BORDER_COMPLETE = 0x01,
+    NAV_WINDOW_STYLE_BORDER_CLEAN = 0x02,
+    NAV_WINDOW_STYLE_BORDERLESS = 0x03,
+};
+
+typedef UInt8 NavWindowStyle;
+
 struct NavWindowType;
 typedef struct NavWindowType NavWindow;
 
-NAV_API NavWindow* Nav_Window_Create(char* wndTitle, int width, int height);
+NAV_API NavWindow* Nav_Window_Create(char* wndTitle, int width, int height, NavWindowStyle style);
 
 NAV_API void Nav_Window_Destroy(NavWindow* wnd);
 

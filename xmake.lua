@@ -17,7 +17,6 @@ target("nav")
 
 
     -- Vulkan
-    --add_links("opengl");
 
 
     -- Platform Build Trait
@@ -46,6 +45,8 @@ target("nav")
 
     -- Nav Platform Indepedent Source Files
     add_files("Nav/Source/Extension/*.c");
+    add_files("Nav/Source/Graphics/OpenGL/*.c");
+
 
     -- Nav Vulkan Source Files
     add_files("Nav/Source/Graphics/Vulkan/*.c");
@@ -60,6 +61,8 @@ target("nav")
         add_files("Nav/Source/Graphics/OpenGL/Win32/*.c")
 
         add_links("user32")
+        add_links("gdi32")
+        add_links("opengl32")
 
     end
 
@@ -84,7 +87,7 @@ target("launcher")
 
     if is_mode("debug") then
 
-        add_cflags("-DDEBUG")
+        add_cflags("-DNAV_BUILD_MODE_DEBUG")
 
     end
 
